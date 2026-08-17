@@ -39,6 +39,7 @@ class KalmanFilter1D:
         self,
         initial_estimate=0.0,
         intial_velocity = 1.0,
+        control_acceleration = 0.1,
         initial_uncertainty=10.0,
         process_variance=0.1,
         measurement_variance=9.0,
@@ -61,6 +62,10 @@ class KalmanFilter1D:
             [process_variance, 0.0],
             [0.0, process_variance],
         ])
+
+        self.a = np.array([
+            [control_acceleration],
+        ])
     
     def predict(self, dt):
         F = np.array([
@@ -68,7 +73,12 @@ class KalmanFilter1D:
             [0.0, 1.0],
         ])
 
-        self.state = F @ self.state     # x- = F * x_hat
+        B = np.array([
+            [0.5 * dt * dt],
+            [dt],
+        ])
+
+        self.state = F @ self.state + self.a   # x- = F * x_hat + B * accel
         self.P = F @ self.P @ F.T + self.Q   # P- = F * P * FT + Q
 
     def update(self,measurement):
@@ -83,8 +93,8 @@ class KalmanFilter1D:
 
         innovation = z - H @ self.state
 
-        S = H @ self.P @ H.T + self.R        # Covariance matrix S
-                                        # H * P * HT + R 
+        S = H @ self.P @ H.T + self.R       # Covariance matrix S
+                                            # H * P * HT + R 
 
         # Calculate K gain
         if (S.shape == (1, 1)):

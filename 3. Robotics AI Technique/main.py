@@ -7,11 +7,14 @@ def main():
     simulation = Simulation(
         initial_position=0.0,
         velocity=1.0,
+        acceleration=0.1,
         measurement_std=3.0,
     )
 
     kalman = KalmanFilter1D(
         initial_estimate=0.0,
+        intial_velocity=1.0,
+        control_acceleration=0.1,
         initial_uncertainty=10.0,
         process_variance=0.1,
         measurement_variance=9.0,
