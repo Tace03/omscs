@@ -1,6 +1,6 @@
 from filters import KalmanFilter1D
 from simulation import Simulation
-from visualization import Visualizer
+from visualization import ScalarVisualizer,StateVisualizer
 
 
 def main():
@@ -17,7 +17,7 @@ def main():
         measurement_variance=9.0,
     )
 
-    visualizer = Visualizer(
+    visualizer = StateVisualizer(
         world_min=0,
         world_max=30,
     )
@@ -32,17 +32,26 @@ def main():
 
         kalman.predict(dt)
 
-        estimate, uncertainty, gain = (
-            kalman.update(measurement)
-        )
+        state, P, K, innovation = kalman.update(measurement)
+
+        estimated_position = state[0, 0]
+        estimated_velocity = state[1, 0]
+
+        position_variance = P[0, 0]
+        velocity_variance = P[1, 1]
+
+        position_gain = K[0, 0]
+        velocity_gain = K[1, 0]
 
         visualizer.update(
             time=current_time,
             true_position=true_position,
+            true_velocity=simulation.velocity,
             measurement=measurement,
-            estimate=estimate,
-            uncertainty=uncertainty,
-            gain=gain,
+            state=state,
+            covariance=P,
+            gain=K,
+            innovation=innovation,
         )
 
         current_time += dt

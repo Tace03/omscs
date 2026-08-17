@@ -1,1 +1,1 @@
-from .kalman_filter import KalmanFilter1D
+from .kalman_filter import ScalarKalmanFilter1D, KalmanFilter1D

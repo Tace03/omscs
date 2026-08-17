@@ -1,4 +1,7 @@
-class KalmanFilter1D:
+
+import numpy as np
+
+class ScalarKalmanFilter1D:
     def __init__(
         self,
         initial_estimate=0.0,
@@ -30,3 +33,70 @@ class KalmanFilter1D:
         self.P = (1 - K) * self.P
 
         return self.x, self.P, K
+
+class KalmanFilter1D:
+    def __init__(
+        self,
+        initial_estimate=0.0,
+        intial_velocity = 1.0,
+        initial_uncertainty=10.0,
+        process_variance=0.1,
+        measurement_variance=9.0,
+    ):
+        self.state = np.array([
+            [initial_estimate],
+            [intial_velocity],
+        ])
+
+        self.P = np.array([
+            [initial_uncertainty, 0],
+            [0                  , initial_uncertainty],
+        ])
+
+        self.R = np.array([
+            [measurement_variance],
+        ])
+
+        self.Q = np.array([
+            [process_variance, 0.0],
+            [0.0, process_variance],
+        ])
+    
+    def predict(self, dt):
+        F = np.array([
+            [1.0, dt],
+            [0.0, 1.0],
+        ])
+
+        self.state = F @ self.state     # x- = F * x_hat
+        self.P = F @ self.P @ F.T + self.Q   # P- = F * P * FT + Q
+
+    def update(self,measurement):
+        # Selection matrix
+        H = np.array([
+            [1.0, 0.0]
+        ])
+
+        z = np.array([
+            [measurement]
+        ])
+
+        innovation = z - H @ self.state
+
+        S = H @ self.P @ H.T + self.R        # Covariance matrix S
+                                        # H * P * HT + R 
+
+        # Calculate K gain
+        if (S.shape == (1, 1)):
+            K = self.P @ H.T / S[0,0]   # K = P * HT * (S)^-1
+        else:
+            K = self.P @ H.T @ np.linalg.inv(S)
+
+        # Update 
+        self.state = self.state + K * (z - H @ self.state)
+
+        I = np.eye(2)
+
+        self.P = (I - K @ H) @ self.P
+
+        return self.state, self.P, K, innovation
