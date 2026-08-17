@@ -1,0 +1,25 @@
+# PDFs
+*.pdf
+
+# Virtual environments
+**/.venv/
+**/venv/
+
+# Python
+**/__pycache__/
+*.py[cod]
+
+# Pytest
+**/.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated media
+*.gif
+*.mp4
