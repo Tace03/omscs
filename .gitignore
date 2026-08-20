@@ -23,3 +23,6 @@ Thumbs.db
 # Generated media
 *.gif
 *.mp4
+
+# 
+/2. Computer Vision/Computer Vision Roadmap.txt
