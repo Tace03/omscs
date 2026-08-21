@@ -53,7 +53,7 @@ class ImageProcessor:
         return output_kernel
 
     
-    def gaussian_blur(self, image,size,sigma):
+    def gaussian_blur(self, image,size = 3,sigma = 2):
         kernel = self.gaussian_kernel(size, sigma)
 
         return self.cross_correlate(image, kernel)
@@ -147,4 +147,54 @@ class ImageProcessor:
             output[row,col] = magnitude[row, col]
 
         return output
+
+    def harris_response(
+        self,
+        image,
+        gaussian_size=3,
+        sigma=1.0,
+        k=0.04
+    ):
+        # Step 1: gradients
+        Ix = self.sobel_x(image)
+        Iy = self.sobel_y(image)
+
+        # Step 2: gradient products
+        Ixx = Ix * Ix
+        Iyy = Iy * Iy
+        Ixy = Ix * Iy
+
+        # Step 3: weighted local sums
+        #
+        # gaussian_blur already performs:
+        # sum(w * local_patch)
+        #
+        # at every valid location.
+        Sxx = self.gaussian_blur(
+            Ixx,
+            gaussian_size,
+            sigma
+        )
+
+        Syy = self.gaussian_blur(
+            Iyy,
+            gaussian_size,
+            sigma
+        )
+
+        Sxy = self.gaussian_blur(
+            Ixy,
+            gaussian_size,
+            sigma
+        )
+
+        # Step 4: determinant and trace
+        det = Sxx * Syy - Sxy**2
+
+        trace = Sxx + Syy
+
+        # Step 5: Harris response
+        R = det - k * trace**2
+
+        return R
 
